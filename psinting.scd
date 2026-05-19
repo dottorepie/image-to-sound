@@ -1,4 +1,6 @@
 
+
+(
 (
 s.options.numWireBufs = 1024*4;
 s.options.numOutputBusChannels=2;
@@ -11,13 +13,10 @@ s.makeGui(w);
 s.meter;
 s.freqscope;
 s.scope;
-
-s.waitForBoot{
-
-Buffer.freeAll;
+);
 ({
 var img,c=0, color,xx=0,yy=0,r=[],g=[],b=[],h_count=0;
-img = Image.open("/path/p.jpg");
+img = Image.open("/path/image1.jpg");
 ~cx=[]; ~cy=[];  ~cz=[];
 ~height=img.height;
 ~width=img.width;
@@ -41,6 +40,9 @@ xx=xx+1;
 		~cz=~cz++b;
 		}.value;
 );
+s.waitForBoot{
+
+Buffer.freeAll;
 
 
 Tdef(\drone, {
@@ -217,8 +219,8 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
         \drive, Pfunc { ~drive },
         \c, Pfunc { ~c },
 
-		\az, Pseries(0pi, pi*Pfunc{2.pow(~incr1/16256)}, inf).collect(_.wrap(pi.neg, pi)).asStream,
-	\el, Pseries(0pi, 0.5pi*Pfunc{2.pow(~incr2/16256)}, inf).collect(_.wrap(0.5pi.neg, 0.5pi)).asStream,
+		\az, Pseries(0pi, pi*Pfunc{2.pow(~incr1/56)}, inf).collect(_.wrap(pi.neg, pi)).asStream,
+	\el, Pseries(0pi, 0.5pi*Pfunc{2.pow(~incr2/56)}, inf).collect(_.wrap(0.5pi.neg, 0.5pi)).asStream,
 
         \attack,  Pfunc { ~attack },
         \dicay, Pfunc { ~decay },
@@ -313,7 +315,7 @@ b.postln;
 				(
 					MIDIdef.cc(\midi_slider2,{ |val, num, chan, src|
 						var bfg;
-							bfg=val.linlin(0,127,0,16256).round(1).asInteger;
+							bfg=val.linlin(0,127,0,56*2).round(1).asInteger;
 						bfg.postln;
 						~incr1=bfg;
 					},26);
@@ -321,7 +323,7 @@ b.postln;
 				(
 					MIDIdef.cc(\midi_slider3,{ |val, num, chan, src|
 						var bfg;
-						bfg=val.linlin(0,127,0,8128).round(1).asInteger;
+						bfg=val.linlin(0,127,0,56).round(1).asInteger;
 						bfg.postln;
 					~incr2=bfg;
 					},27);
