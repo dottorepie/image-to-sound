@@ -81,7 +81,7 @@ height.postln;
 ~signalSize = 2048*8;
 );
 (
-~note=15;
+~note=25;
 (
 {
 var nn=1.neg;
@@ -121,7 +121,7 @@ wt = signal.asWavetable;
 (
 SynthDef.new(\synth,{
 arg gain=1,drive=0,c=0,az=0,el=0,scalee=0,dicay=0.5,attack=0.01;
-var fund,fu=32,n=0,sc=15,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
+var fund,fu=16,n=0,sc=26,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
 var freq1,freq2,freq3,amp1,amp2,amp3,sig1,sig2,sig3,heavy;
 var b_x,b_y,b_z,polytope,mp,env,expansion,sph1,sph2,xx,yy,zz;
 
@@ -246,7 +246,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 				(
 					MIDIdef.cc(\midi_pot1,{ |val, num, chan, src|
 						var a;
-						a=val.linexp(0,127,0.00001,1);
+						a=val.linexp(0,127,0.00001,10);
 						a.postln;
 						~gain=a;
 					},1);
@@ -304,7 +304,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 				(
 MIDIdef.cc(\midi_pot18,{ |val, num, chan, src|
 var b;
-b=val.linlin(0,127,0.001,2);
+b=val.linlin(0,127,0.001,8);
 b.postln;
 ~decay=b;
 },18);
@@ -312,7 +312,7 @@ b.postln;
 						(
 					MIDIdef.cc(\midi_slider1,{ |val, num, chan, src|
 						var bfg;
-						bfg=val.linlin(0,127,0.1,100);
+						bfg=val.linexp(0,127,0.1,100);
 						bfg.postln;
 						TempoClock.default.tempo_(bfg);
 					},25);
