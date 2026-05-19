@@ -17,7 +17,7 @@ s.waitForBoot{
 Buffer.freeAll;
 ({
 var img,c=0, color,xx=0,yy=0,r=[],g=[],b=[],h_count=0;
-img = Image.open("/Users/amimid/Documents/monad/p.jpg");
+img = Image.open("/path/p.jpg");
 ~cx=[]; ~cy=[];  ~cz=[];
 ~height=img.height;
 ~width=img.width;
