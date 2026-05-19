@@ -3,12 +3,12 @@
 (
 (
 s.options.numWireBufs = 1024*4;
-s.options.numOutputBusChannels=2;
+s.options.numOutputBusChannels=3;
 s.options.numInputBusChannels=0;
 s.options.memSize = 8192*32;
 s.options.blockSize = 64;
 s.options.maxNodes = 8192*2;
-//s.boot;
+s.boot;
 s.makeGui(w);
 s.meter;
 s.freqscope;
@@ -16,7 +16,7 @@ s.scope;
 );
 ({
 var img,c=0, color,xx=0,yy=0,r=[],g=[],b=[],h_count=0;
-img = Image.open("/path/image1.jpg");
+img = Image.open("/Users/amimid/Desktop/image1.jpg");
 ~cx=[]; ~cy=[];  ~cz=[];
 ~height=img.height;
 ~width=img.width;
@@ -123,15 +123,17 @@ SynthDef.new(\synth,{
 arg gain=1,drive=0,c=0,az=0,el=0,scalee=0,dicay=0.5,attack=0.01;
 var fund,fu=32,n=0,sc=16256*3,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
 var freq1,freq2,freq3,amp1,amp2,amp3,sig1,sig2,sig3,heavy;
-var b_x,b_y,b_z,polytope,mp,env,expansion,sph1,sph2;
+var b_x,b_y,b_z,polytope,mp,env,expansion,sph1,sph2,xx,yy,zz;
 
 env=EnvGen.ar(Env.perc(attack,dicay,gain),doneAction:2);
 expansion=2.pow(c.lag(0.001)/16256);
 fund=(fu*(9/8))*expansion;
 heavy=2.pow(drive.lag(0.001)/16256);
-n=(az.linlin(pi.neg,pi,0,~width).round(1).asInteger)+el.linlin(0.5pi.neg,0.5pi,0,~height).round(1).asInteger;
+xx=Spherical(~width*~height,az,el).x.round(1).asInteger;
+yy=Spherical(~width*~height,az,el).y.round(1).asInteger;
+zz=Spherical(~width*~height,az,el).z.round(1).asInteger;
 
-polytope=Cartesian(Select.kr(n,~cx),Select.kr(n,~cy),Select.kr(n,~cz));
+polytope=Cartesian(Select.kr(xx,~cx),Select.kr(yy,~cy),Select.kr(zz,~cz));
 mp=Spherical(sc,polytope.theta,  polytope.phi);
 b_x=2.pow(mp.x.round(1) /16256);
 b_y=2.pow(mp.y.round(1) /16256);
@@ -153,7 +155,7 @@ sig1=LPF.ar((Osc.ar(~wt.bufnum,freq1,phase:phasex,mul:300).abs*SinOsc.ar(freq1,p
 sig2=LPF.ar((Osc.ar(~wt.bufnum,freq2,phase:phasey,mul:300).abs*SinOsc.ar(freq2,phase:phasey)),freq2*heavy,amp2);
 sig3=LPF.ar((Osc.ar(~wt.bufnum,freq3,phase:phasez,mul:300).abs*SinOsc.ar(freq3,phase:phasez)),freq3*heavy,amp3);
 
-Out.ar(0,sig1*env);Out.ar(1,sig2*env);Out.ar(0,(sig3*env*2.sqrt.reciprocal)!2);
+Out.ar(0,sig1*env);Out.ar(1,sig2*env);Out.ar(2,sig3*env);
 
 
 }).add;
@@ -219,8 +221,8 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
         \drive, Pfunc { ~drive },
         \c, Pfunc { ~c },
 
-		\az, Pseries(0pi, pi*Pfunc{2.pow(~incr1/56)}, inf).collect(_.wrap(pi.neg, pi)).asStream,
-	\el, Pseries(0pi, 0.5pi*Pfunc{2.pow(~incr2/56)}, inf).collect(_.wrap(0.5pi.neg, 0.5pi)).asStream,
+		\az, Pseries(0, Pfunc{~incr1}, inf).collect(_.wrap(pi.neg, pi)).asStream,
+	\el, Pseries(0, Pfunc{~incr2}, inf).collect(_.wrap(0.5pi.neg, 0.5pi)).asStream,
 
         \attack,  Pfunc { ~attack },
         \dicay, Pfunc { ~decay },
@@ -315,7 +317,7 @@ b.postln;
 				(
 					MIDIdef.cc(\midi_slider2,{ |val, num, chan, src|
 						var bfg;
-							bfg=val.linlin(0,127,0,56*2).round(1).asInteger;
+							bfg=val.linlin(0,127,1.degrad,360.degrad).round((360/12).degrad);
 						bfg.postln;
 						~incr1=bfg;
 					},26);
@@ -323,8 +325,8 @@ b.postln;
 				(
 					MIDIdef.cc(\midi_slider3,{ |val, num, chan, src|
 						var bfg;
-						bfg=val.linlin(0,127,0,56).round(1).asInteger;
-						bfg.postln;
+							bfg=val.linlin(0,127,1.degrad,180.degrad).round((360/12).degrad);
+							bfg.postln;
 					~incr2=bfg;
 					},27);
 				);
