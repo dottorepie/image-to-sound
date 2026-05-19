@@ -81,7 +81,7 @@ height.postln;
 ~signalSize = 2048*8;
 );
 (
-~note=10;
+~note=15;
 (
 {
 var nn=1.neg;
@@ -121,7 +121,7 @@ wt = signal.asWavetable;
 (
 SynthDef.new(\synth,{
 arg gain=1,drive=0,c=0,az=0,el=0,scalee=0,dicay=0.5,attack=0.01;
-var fund,fu=32,n=0,sc=16256*3,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
+var fund,fu=32,n=0,sc=15,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
 var freq1,freq2,freq3,amp1,amp2,amp3,sig1,sig2,sig3,heavy;
 var b_x,b_y,b_z,polytope,mp,env,expansion,sph1,sph2,xx,yy,zz;
 
@@ -135,9 +135,12 @@ zz=Spherical(~width*~height,az,el).z.round(1).asInteger;
 
 polytope=Cartesian(Select.kr(xx,~cx),Select.kr(yy,~cy),Select.kr(zz,~cz));
 mp=Spherical(sc,polytope.theta,  polytope.phi);
-b_x=2.pow(mp.x.round(1) /16256);
-b_y=2.pow(mp.y.round(1) /16256);
-b_z=2.pow(mp.z.round(1) /16256);
+//b_x=2.pow(mp.x.round(1) /16256);
+//b_y=2.pow(mp.y.round(1) /16256);
+//b_z=2.pow(mp.z.round(1) /16256);
+b_x=2.pow(Select.kr(mp.x.round(1), Select.kr(scalee.lag(0.001),~sc)) /12);
+b_y=2.pow(Select.kr(mp.y.round(1), Select.kr(scalee.lag(0.001),~sc)) /12);
+b_z=2.pow(Select.kr(mp.z.round(1), Select.kr(scalee.lag(0.001),~sc)) /12);
 mod_x=polytope.x;
 mod_y=polytope.y;
 mod_z=polytope.z;
@@ -174,7 +177,7 @@ var m1=1.neg, m2=1.neg, m3=1.neg,a,b,c,n=0,bank=4,time=32.reciprocal,beat=1,r=0;
 
 ~dur1=[];~dur2=[];~dur3=[]; ~dx=[];~dy=[]; ~dz=[]; ~durx=[]; ~dury=[]; ~durz=[]; ~dur=[];
 
-2.do{
+14.do{
 ~x=bank.collect{
 m1=m1+1;
 b=Spherical(beat,~az.[m1],~el.[m1]).rotate(~r).tilt(~r1).tumble(~r2).x;
