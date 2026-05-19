@@ -262,7 +262,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 						(
 					MIDIdef.cc(\midi_pot3,{ |val, num, chan, src|
 						var a;
-						a=val.linlin(0,127,0.001,1);
+						a=val.linexp(0,127,0.001,4);
 						a.postln;
 						~attack=a;
 					},3);
@@ -304,7 +304,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 				(
 MIDIdef.cc(\midi_pot18,{ |val, num, chan, src|
 var b;
-b=val.linlin(0,127,0.001,8);
+b=val.linexp(0,127,0.001,8);
 b.postln;
 ~decay=b;
 },18);
