@@ -3,7 +3,7 @@
 (
 (
 s.options.numWireBufs = 1024*4;
-s.options.numOutputBusChannels=3;
+s.options.numOutputBusChannels=4;
 s.options.numInputBusChannels=0;
 s.options.memSize = 8192*32;
 s.options.blockSize = 64;
@@ -81,17 +81,17 @@ height.postln;
 ~signalSize = 2048*8;
 );
 (
-~note=25;
+~note=56;
 (
 {
 var nn=1.neg;
-~scalee=~note.collect{nn=nn+1;Scale.majorPentatonic.performDegreeToKey(nn,12)};
+~scalee=~note.collect{nn=nn+1;Scale.phrygian.performDegreeToKey(nn,12)};
 }.value;
 );
 (
 {
 var nn=1.neg;
-~scaleee=~note.collect{nn=nn+1;Scale.minorPentatonic.performDegreeToKey(nn,12)};
+~scaleee=~note.collect{nn=nn+1;Scale.dorian.performDegreeToKey(nn,12)};
 }.value;
 );
 ~sc=[~scalee,~scaleee];
@@ -120,10 +120,11 @@ wt = signal.asWavetable;
 
 (
 SynthDef.new(\synth,{
-arg gain=1,drive=0,c=0,az=0,el=0,scalee=0,dicay=0.5,attack=0.01;
-var fund,fu=16,n=0,sc=26,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
+arg gain=1,drive=0,c=0,az=0,el=0,scalee=0,dicay=0.5,attack=0.01,sc=20;
+var fund,fu=16,n=0,mod_x,mod_y,mod_z,phasex,phasey,phasez,low=0;
 var freq1,freq2,freq3,amp1,amp2,amp3,sig1,sig2,sig3,heavy;
 var b_x,b_y,b_z,polytope,mp,env,expansion,sph1,sph2,xx,yy,zz;
+var g_ch1,g_ch2,g_ch3,g_ch4;
 
 env=EnvGen.ar(Env.perc(attack,dicay,gain),doneAction:2);
 expansion=2.pow(c.lag(0.001)/16256);
@@ -158,8 +159,45 @@ sig1=LPF.ar((Osc.ar(~wt.bufnum,freq1,phase:phasex,mul:300).abs*SinOsc.ar(freq1,p
 sig2=LPF.ar((Osc.ar(~wt.bufnum,freq2,phase:phasey,mul:300).abs*SinOsc.ar(freq2,phase:phasey)),freq2*heavy,amp2);
 sig3=LPF.ar((Osc.ar(~wt.bufnum,freq3,phase:phasez,mul:300).abs*SinOsc.ar(freq3,phase:phasez)),freq3*heavy,amp3);
 
-Out.ar(0,sig1*env);Out.ar(1,sig2*env);Out.ar(0,(sig3*env*2.sqrt.reciprocal)!2);
+g_ch1 = (
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).x *
+Spherical(1,~az[0],~el[0]).x) +
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).y *
+Spherical(1,~az[0],~el[0]).y)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).z *
+Spherical(1,~az[0],~el[0]).z)
+);
+g_ch2 = (
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).x *
+Spherical(1,~az[1],~el[1]).x)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).y *
+Spherical(1,~az[1],~el[1]).y)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).z *
+Spherical(1,~az[1],~el[1]).z)
+);
+g_ch3 = (
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi ).wrap(~el[2],~el[1])).x *
+Spherical(1,~az[2],~el[2]).x)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).y *
+Spherical(1,~az[2],~el[2]).y)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).z *
+Spherical(1,~az[2],~el[2]).z)
+);
+g_ch4 = (
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).x *
+Spherical(1,~az[3],~el[3]).x) +
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).y *
+Spherical(1,~az[3],~el[3]).y)+
+(Spherical(1,(polytope.theta).wrap(pi,pi.neg),(polytope.phi).wrap(~el[2],~el[1])).z *
+Spherical(1,~az[3],~el[3]).z)
+);
 
+Out.ar(0,sig1*env);Out.ar(1,sig2*env);Out.ar(0,(sig3*env*2.sqrt.reciprocal)!2);
+(
+Out.ar(0,sig1*env*g_ch1);Out.ar(1,sig1*env*g_ch2);Out.ar(2,sig1*env*g_ch3);Out.ar(3,sig1*env*g_ch4);
+Out.ar(0,sig2*env*g_ch1);Out.ar(1,sig2*env*g_ch2);Out.ar(2,sig2*env*g_ch3);Out.ar(3,sig2*env*g_ch4);
+Out.ar(0,sig3*env*g_ch1);Out.ar(1,sig3*env*g_ch2);Out.ar(2,sig3*env*g_ch3);Out.ar(3,sig3*env*g_ch4);
+)
 
 }).add;
 		);
@@ -177,7 +215,7 @@ var m1=1.neg, m2=1.neg, m3=1.neg,a,b,c,n=0,bank=4,time=32.reciprocal,beat=1,r=0;
 
 ~dur1=[];~dur2=[];~dur3=[]; ~dx=[];~dy=[]; ~dz=[]; ~durx=[]; ~dury=[]; ~durz=[]; ~dur=[];
 
-14.do{
+3.do{
 ~x=bank.collect{
 m1=m1+1;
 b=Spherical(beat,~az.[m1],~el.[m1]).rotate(~r).tilt(~r1).tumble(~r2).x;
@@ -205,7 +243,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 );
 
 ~gain=1;~drive=0;~c=0;~az=0;~el=0;~scalee=0;~attack=0.01;~decay=1;
-
+~gold=((1+5.sqrt)/2);~silver=(1+2.sqrt);~ssc=25;
 ~incr=0;
 ~g=((1+5.sqrt)/2);
 ~s=(1+2.sqrt);
@@ -221,6 +259,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
         \dur, ~seq,
 
         \gain, Pfunc { ~gain },
+		  \sc, Pfunc { ~ssc },
         \drive, Pfunc { ~drive },
         \c, Pfunc { ~c },
 
@@ -237,12 +276,18 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 					~pattern.play;
 			);
 
-		~orange=3;
-
 		(
 			MIDIClient.init;
 			MIDIIn.connectAll;
 			(
+					(
+					MIDIdef.cc(\midi_pot21,{ |val, num, chan, src|
+						var a;
+						a=val.linexp(0,127,1,56).round(1).asInteger;
+						a.postln;
+						~ssc=a;
+					},21);
+				);
 				(
 					MIDIdef.cc(\midi_pot1,{ |val, num, chan, src|
 						var a;
@@ -251,14 +296,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 						~gain=a;
 					},1);
 				);
-				(
-					MIDIdef.cc(\midi_pot2,{ |val, num, chan, src|
-						var a;
-						a=val.linlin(0,127,(16256).neg,(16256*3)).round(1).asInteger;
-						a.postln;
-						~drive=a;
-					},2);
-				);
+				.;
 						(
 					MIDIdef.cc(\midi_pot3,{ |val, num, chan, src|
 						var a;
@@ -295,7 +333,7 @@ bank.do{ ~dur3=~dur3++~dz.[n];n=n+1;};n=0;
 						(
 					MIDIdef.cc(\midi_pot8,{ |val, num, chan, src|
 						var a;
-						a=val.linlin(0,127,0,16256*~orange).round(1).asInteger;
+						a=val.linlin(0,127,0,16256*2).round(1).asInteger;
 						a.postln;
 						~c=a;
 					},8);
@@ -317,10 +355,10 @@ b.postln;
 						TempoClock.default.tempo_(bfg);
 					},25);
 				);
-				(
+					(
 					MIDIdef.cc(\midi_slider2,{ |val, num, chan, src|
 						var bfg;
-							bfg=val.linlin(0,127,1.degrad,360.degrad).round((360/12).degrad);
+							bfg=val.linlin(0,127,0.degrad,2pi-(2pi/~gold)).round((2pi/992).degrad);
 						bfg.postln;
 						~incr1=bfg;
 					},26);
@@ -328,7 +366,7 @@ b.postln;
 				(
 					MIDIdef.cc(\midi_slider3,{ |val, num, chan, src|
 						var bfg;
-							bfg=val.linlin(0,127,1.degrad,180.degrad).round((360/12).degrad);
+							bfg=val.linlin(0,127,0.degrad,pi-(pi/~gold)).round((pi/992).degrad);
 							bfg.postln;
 					~incr2=bfg;
 					},27);
